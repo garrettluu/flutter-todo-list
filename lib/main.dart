@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_todo_list/firebaseAdapter.dart';
 
 void main() => runApp(MyApp());
 
@@ -45,6 +46,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  FirebaseAdapter firebaseAdapter;
+  _MyHomePageState() {
+    firebaseAdapter = new FirebaseAdapter(Firestore.instance);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,12 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: ListView(
-          children: <Widget>[
-            Task(name: 'Test'),
-            Task(name: 'Test2'),
-          ],
-        ),
+        child: firebaseAdapter.getTaskList(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: null,
