@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => NewTask(firebaseAdapter: firebaseAdapter,)),
+            MaterialPageRoute(builder: (context) => EditTask(firebaseAdapter: firebaseAdapter)),
           );
         },
         tooltip: 'Increment',
@@ -84,15 +84,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class NewTask extends StatefulWidget {
+class EditTask extends StatefulWidget {
   FirebaseAdapter firebaseAdapter;
-  NewTask({Key key, @required this.firebaseAdapter}) : super(key: key);
+  bool edit;
+  String documentID;
+  EditTask({Key key, @required this.firebaseAdapter, this.edit = false, this.documentID}) : super(key: key);
 
   @override
-  _NewTaskState createState() => _NewTaskState();
+  _EditTaskState createState() => _EditTaskState();
 }
 
-class _NewTaskState extends State<NewTask> {
+class _EditTaskState extends State<EditTask> {
   final controller = TextEditingController();
   String text = '';
   @override
@@ -114,7 +116,7 @@ class _NewTaskState extends State<NewTask> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text('New Task'),
+        title: Text('Edit Task'),
       ),
       body: Center (
         child: TextField(
@@ -124,7 +126,11 @@ class _NewTaskState extends State<NewTask> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          widget.firebaseAdapter.createTask(controller.text);
+          if (widget.edit) {
+            widget.firebaseAdapter.updateTask(controller.text, widget.documentID);
+          } else {
+            widget.firebaseAdapter.createTask(controller.text);
+          }
           Navigator.pop(context);
         },
         child: Icon(Icons.send),
@@ -149,9 +155,21 @@ class Task extends StatelessWidget {
             name,
             style: TextStyle(fontSize: 16),
           ),
-          RaisedButton(onPressed: () {
-            firebaseAdapter.deleteTask(id);
-          }),
+          RaisedButton(
+            onPressed: () {
+              firebaseAdapter.deleteTask(id);
+            },
+            child: Icon(Icons.delete),
+          ),
+          RaisedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditTask(firebaseAdapter: firebaseAdapter, edit: true, documentID: id))
+              );
+            },
+            child: Icon(Icons.edit),
+          )
         ],
       ),
     );

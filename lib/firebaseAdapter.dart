@@ -37,5 +37,9 @@ class FirebaseAdapter {
   createTask(String name) {
     firebaseInstance.collection('tasks').add(<String, dynamic>{'name': name});
   }
+
+  updateTask(String name, String documentID) {
+    firebaseInstance.collection('tasks').document(documentID).updateData(<String, dynamic>{'name': name});
+  }
   
 }
