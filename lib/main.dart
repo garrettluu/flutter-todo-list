@@ -71,7 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: firebaseAdapter.getTaskList(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: null,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewTask(firebaseAdapter: firebaseAdapter,)),
+          );
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -79,19 +84,75 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class NewTask extends StatefulWidget {
+  FirebaseAdapter firebaseAdapter;
+  NewTask({Key key, @required this.firebaseAdapter}) : super(key: key);
+
+  @override
+  _NewTaskState createState() => _NewTaskState();
+}
+
+class _NewTaskState extends State<NewTask> {
+  final controller = TextEditingController();
+  String text = '';
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_setText);
+  }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  _setText() => this.text = controller.text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text('New Task'),
+      ),
+      body: Center (
+        child: TextField(
+          decoration: InputDecoration(border: InputBorder.none, hintText: 'Enter a Task name'),
+          controller: controller,
+        )
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          widget.firebaseAdapter.createTask(controller.text);
+          Navigator.pop(context);
+        },
+        child: Icon(Icons.send),
+      ),
+    );
+  }
+}
+
 class Task extends StatelessWidget {
-  Task({@required this.name});
-  final name;
+  String name;
+  String id;
+  FirebaseAdapter firebaseAdapter;
+  Task({@required this.name, @required this.id, this.firebaseAdapter});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Container(
-        child: Text(
-          name,
-          style: TextStyle(fontSize: 16),
-        ),
+      child: Row(
+        children: <Widget>[
+          Text(
+            name,
+            style: TextStyle(fontSize: 16),
+          ),
+          RaisedButton(onPressed: () {
+            firebaseAdapter.deleteTask(id);
+          }),
+        ],
       ),
     );
   }
