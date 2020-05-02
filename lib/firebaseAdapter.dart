@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_todo_list/main.dart';
 
 class FirebaseAdapter {
-  var firebaseInstance;
+  Firestore firebaseInstance;
   FirebaseAdapter(this.firebaseInstance);
 
   getTaskList() {
@@ -11,11 +11,11 @@ class FirebaseAdapter {
       stream: firebaseInstance.collection('tasks').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) {
-          return new Task(name: 'Error: ${snapshot.error}');
+          return new Text('Error: ${snapshot.error}');
         }
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return new Task(name:'Loading...');
+            return new Text('Loading...');
           default:
             return new ListView(
               children: getTasks(snapshot),
@@ -26,8 +26,16 @@ class FirebaseAdapter {
 
   getTasks(AsyncSnapshot<QuerySnapshot> snapshot) {
     return snapshot.data.documents.map(
-      (doc) => new Task(name: doc["name"])
+      (DocumentSnapshot doc) => new Task(name: doc["name"], id: doc.documentID, firebaseAdapter: this)
     ).toList();
+  }
+
+  deleteTask(String documentID) {
+    firebaseInstance.collection('tasks').document(documentID).delete();
+  }
+
+  createTask(String name) {
+    firebaseInstance.collection('tasks').add(<String, dynamic>{'name': name});
   }
   
 }
